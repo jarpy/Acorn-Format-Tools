@@ -35,7 +35,11 @@ except ImportError:
 __version__ = "0.42 (Sun 29th August 2010)"
 
 default_convert_dict = {"/": "."}
-
+exit_codes = {
+    'adfs_error': 5,
+    'cli_error': 3,
+    'io_error': 4,
+}
 
 def read_cmdsyntax_input(argv, syntax):
 
@@ -227,7 +231,7 @@ if __name__ == "__main__":
     except IOError:
         print "Couldn't open the ADF file: %s" % adf_file
         print
-        sys.exit()
+        sys.exit(exit_codes['io_error'])
     
     
     if listing == 0 and verify == 0:
@@ -240,7 +244,7 @@ if __name__ == "__main__":
         except ADFSlib.ADFS_exception:
         
             print "Unrecognised disc image: %s" % adf_file
-            sys.exit()
+            sys.exit(exit_codes['adfs_error'])
     
     elif listing != 0:
     
@@ -252,7 +256,7 @@ if __name__ == "__main__":
         except ADFSlib.ADFS_exception:
         
             print "Unrecognised disc image: %s" % adf_file
-            sys.exit()
+            sys.exit(exit_codes['adfs_error'])
     
     else:
     
@@ -269,7 +273,7 @@ if __name__ == "__main__":
         except ADFSlib.ADFS_exception:
         
             print "Unrecognised disc image: %s" % adf_file
-            sys.exit()
+            sys.exit(exit_codes['adfs_error'])
         
         adfsdisc.print_log(verbose = 1)
         
@@ -318,7 +322,7 @@ if __name__ == "__main__":
         except IndexError:
         
             print "Insufficient characters in character conversion list."
-            sys.exit()
+            sys.exit(exit_codes['cli_error'])
     
     else:
     
