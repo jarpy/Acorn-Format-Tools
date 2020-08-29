@@ -26,6 +26,7 @@ __license__ = "GNU General Public License (version 3)"
 
 
 import os, string, struct, time
+from functools import reduce
 
 
 INFORM = 0
@@ -33,7 +34,7 @@ WARNING = 1
 ERROR = 2
 
 # Find the number of centiseconds between 1900 and 1970.
-between_epochs = ((365 * 70) + 17) * 24 * 360000L
+between_epochs = ((365 * 70) + 17) * 24 * 360000
 
 
 class Utilities:
@@ -167,7 +168,7 @@ class Utilities:
             elements.append(name)
         
         # Remove any empty list elements or those containing a $ character.
-        elements = filter(lambda x: x != '' and x != "$", elements)
+        elements = [x for x in elements if x != '' and x != "$"]
         
         try:
         
@@ -182,21 +183,21 @@ class Utilities:
                     # This element of the directory does not exist.
                     # Create a directory here.
                     os.mkdir(built)
-                    print 'Created directory:', built
+                    print('Created directory:', built)
                 
                 elif not os.path.isdir(built):
                 
                     # This element of the directory already exists
                     # but is not a directory.
-                    print 'A file exists which prevents a ' + \
-                        'directory from being created: %s' % built
+                    print('A file exists which prevents a ' + \
+                        'directory from being created: %s' % built)
                     
                     return ""
         
         except OSError:
         
-            print 'Directory could not be created: %s' % \
-                string.join(elements, os.sep)
+            print('Directory could not be created: %s' % \
+                string.join(elements, os.sep))
             
             return ""
         
@@ -211,7 +212,7 @@ class Utilities:
         
         for c in old_name:
         
-            if c in convert_dict.keys():
+            if c in list(convert_dict.keys()):
             
                 name = name + convert_dict[c]
             
@@ -314,7 +315,7 @@ class ADFSmap(Utilities):
     
     def has_key(self, key):
     
-        return self.disc_map.has_key(key)
+        return key in self.disc_map
 
 
 class ADFSnewMap(ADFSmap):
@@ -403,7 +404,7 @@ class ADFSnewMap(ADFSmap):
                     # Define a new entry.
                     #print "Begin:", hex(entry), hex(a)
                     
-                    if not disc_map.has_key(entry):
+                    if entry not in disc_map:
                     
                         # Create a new map entry if none exists.
                         disc_map[entry] = []
@@ -936,8 +937,7 @@ class ADFSdisc(Utilities):
                 self.disc_type = 'adE'
             
             else:
-                raise ADFS_exception, \
-                    'Please supply a .adf, .adl or .adD file.'
+                raise ADFS_exception('Please supply a .adf, .adl or .adD file.')
         
         elif length == 1638400:
         
@@ -949,7 +949,7 @@ class ADFSdisc(Utilities):
             self.dir_markers = ('Nick',)
         
         else:
-            raise ADFS_exception, 'Please supply a .adf, .adl or .adD file.'
+            raise ADFS_exception('Please supply a .adf, .adl or .adD file.')
         
         # Read tracks
         self.sectors = self._read_tracks(adf, interleave)
@@ -1061,15 +1061,15 @@ class ADFSdisc(Utilities):
                 (INFORM, "Checklist for E format discs:")
                 )
             
-            for key, value in checklist.items():
+            for key, value in list(checklist.items()):
             
                 self.verify_log.append(
                     (INFORM, "%s: %s" % (key, ["no", "yes"][value]))
                     )
         
         # If all the tests pass then the disc is an E format disc.
-        if reduce(lambda a, b: a + b, checklist.values(), 0) == \
-            len(checklist.keys()):
+        if reduce(lambda a, b: a + b, list(checklist.values()), 0) == \
+            len(list(checklist.keys())):
         
             if self.verify: self.verify_log.append((INFORM, "E format disc"))
             return "E"
@@ -1253,10 +1253,9 @@ class ADFSdisc(Utilities):
                     t = t + f.read(self.nsectors * self.sector_size)
             
             except IOError:
-                print 'Less than %i tracks found.' % self.ntracks
+                print('Less than %i tracks found.' % self.ntracks)
                 f.close()
-                raise ADFS_exception, \
-                    'Less than %i tracks found.' % self.ntracks
+                raise ADFS_exception('Less than %i tracks found.' % self.ntracks)
         
         else:
         
@@ -1277,10 +1276,9 @@ class ADFSdisc(Utilities):
             
             except IOError:
             
-                print 'Less than %i tracks found.' % self.ntracks
+                print('Less than %i tracks found.' % self.ntracks)
                 f.close()
-                raise ADFS_exception, \
-                    'Less than %i tracks found.' % self.ntracks
+                raise ADFS_exception('Less than %i tracks found.' % self.ntracks)
         
         return t
     
@@ -1468,7 +1466,7 @@ class ADFSdisc(Utilities):
         
         if files == []:
         
-            print path, "(empty)"
+            print(path, "(empty)")
         
         for obj in files:
     
@@ -1478,12 +1476,12 @@ class ADFSdisc(Utilities):
                 if not filetypes:
                 
                     # Load and execution addresses treated as valid.
-                    print string.expandtabs(
+                    print(string.expandtabs(
                         "%s.%s\t%X\t%X\t%X" % (
                             path, name, obj.load_address,
                             obj.execution_address, obj.length
                             ), 16
-                        )
+                        ))
                 
                 else:
                 
@@ -1493,20 +1491,20 @@ class ADFSdisc(Utilities):
                     time_stamp = obj.time_stamp()
                     if not time_stamp or not obj.has_filetype():
                     
-                        print string.expandtabs(
+                        print(string.expandtabs(
                             "%s.%s\t%X\t%X\t%X" % (
                                 path, name, obj.load_address,
                                 obj.execution_address, obj.length
                                 ), 16
-                            )
+                            ))
                     else:
                         time_stamp = time.strftime("%H:%M:%S, %a %d %b %Y", time_stamp)
-                        print string.expandtabs(
+                        print(string.expandtabs(
                             "%s.%s\t%s\t%s\t%X" % (
                                 path, name, obj.filetype().upper(), time_stamp,
                                 obj.length
                                 ), 16
-                            )
+                            ))
             
             else:
             
@@ -1548,7 +1546,7 @@ class ADFSdisc(Utilities):
                         out.write(obj.data)
                         out.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % out_file
+                        print("Couldn't open the file: %s" % out_file)
                     
                     try:
                         inf = open(inf_file, "w")
@@ -1558,7 +1556,7 @@ class ADFSdisc(Utilities):
                             ))
                         inf.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % inf_file
+                        print("Couldn't open the file: %s" % inf_file)
                 
                 else:
                 
@@ -1570,7 +1568,7 @@ class ADFSdisc(Utilities):
                         out.write(obj.data)
                         out.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % out_file
+                        print("Couldn't open the file: %s" % out_file)
             else:
             
                 new_path = os.path.join(path, name)
@@ -1617,7 +1615,7 @@ class ADFSdisc(Utilities):
                         out.write(obj.data)
                         out.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % out_file
+                        print("Couldn't open the file: %s" % out_file)
                     
                     try:
                         inf = open(inf_file, "w")
@@ -1627,7 +1625,7 @@ class ADFSdisc(Utilities):
                             ))
                         inf.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % inf_file
+                        print("Couldn't open the file: %s" % inf_file)
                 else:
                 
                     # Interpret the load address as a filetype.
@@ -1638,7 +1636,7 @@ class ADFSdisc(Utilities):
                         out.write(obj.data)
                         out.close()
                     except IOError:
-                        print "Couldn't open the file: %s" % out_file
+                        print("Couldn't open the file: %s" % out_file)
             else:
             
                 new_path = os.path.join(path, name)
@@ -1708,12 +1706,12 @@ class ADFSdisc(Utilities):
         are only printed if verbose is set to 1.
         """
         
-        if hasattr(self, "disc_map") and self.disc_map.has_key(1):
+        if hasattr(self, "disc_map") and 1 in self.disc_map:
         
-            print self._plural(
+            print(self._plural(
                 "%i mapped %s found.", [len(self.disc_map[1])],
                 [("defects", "defect", "defects")]
-                )
+                ))
         
         # Count the information, warning and error messages in the log.
         informs = reduce(lambda a, b: a + (b[0] == INFORM), self.verify_log, 0)
@@ -1724,16 +1722,16 @@ class ADFSdisc(Utilities):
         
         if (warnings + errors) == 0:
         
-            print "All objects located."
+            print("All objects located.")
             if not verbose: return
         
         if self.verify_log != []:
         
-            print
+            print()
         
         for msgtype, line in self.verify_log:
         
-            print line
+            print(line)
     
     def disc_format(self):
     
