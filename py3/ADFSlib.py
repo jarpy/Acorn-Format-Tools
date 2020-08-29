@@ -24,15 +24,17 @@ __date__ = "Sun 29th August 2010"
 __version__ = "0.42"
 __license__ = "GNU General Public License (version 3)"
 
-import debugpy
-debugpy.listen(5678)
-print("Waiting for debugger attach")
-#debugpy.wait_for_client()
-
 import os, string, struct, time
 from functools import reduce
 
-import sys
+try:
+    if os.environ['DEBUGPY'] == 'true':
+        import debugpy
+        debugpy.listen(5678)
+        print("Waiting for debugger attach")
+        debugpy.wait_for_client()
+except KeyError:
+    pass
 
 INFORM = 0
 WARNING = 1
@@ -47,13 +49,11 @@ class Utilities:
     # Little endian reading
     
     def _read_signed_word(self, s):
-        #print("_read_signed_word: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         return struct.unpack("<i", s)[0]
     
     def _read_unsigned_word(self, s):
-        #print("_read_unsigned_word: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         if isinstance(s, str):
@@ -61,7 +61,6 @@ class Utilities:
         return struct.unpack("<I", s)[0]
     
     def _read_signed_byte(self, s):
-        #print("_read_signed_byte: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         if isinstance(s, str):
@@ -69,7 +68,6 @@ class Utilities:
         return struct.unpack("<b", s)[0]
     
     def _read_unsigned_byte(self, s):
-        #print("_read_unsigned_byte: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         if isinstance(s, str):
@@ -77,7 +75,6 @@ class Utilities:
         return struct.unpack("<B", s)[0]
     
     def _read_unsigned_half_word(self, s):
-        #print("_read_unsigned_half_word: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         if isinstance(s, str):
@@ -86,14 +83,11 @@ class Utilities:
         return struct.unpack("<H", s)[0]
     
     def _read_signed_half_word(self, s):
-        #print("_read_signed_half_word: %s" % type(s))
         if isinstance(s, int):
             s = bytes([s])
         return struct.unpack("<h", s)[0]
     
     def _str2num(self, size, s):
-        #print("_str2num: size=%s s=%s" % (size, type(s)))        
-        #return int(s.decode('ascii'))
         if isinstance(s, str):
             s = s.encode('ascii')
         i = 0
@@ -124,9 +118,9 @@ class Utilities:
         return new
     
     def _safe(self, s, with_space = 0):
-        print(f"Called _safe with s type={type(s)} val={s}")
         if isinstance(s, str):
             s = s.encode('ascii')
+
         new = ""
         if with_space == 1:
             lower = 31
@@ -381,7 +375,6 @@ class ADFSnewMap(ADFSmap):
         current_piece = None
         current_start = 0
         
-        print(f'self.sector_size={self.sector_size}')
         next_zone = self.header + self.sector_size
 
         # Copy the free space map.
@@ -531,7 +524,6 @@ class ADFSnewMap(ADFSmap):
         
             # The next zone starts a sector after this one.
             next_zone = a + self.sector_size
-            print(f'a={a} self.sector_size={self.sector_size}')
             
             a = a + 1
             
@@ -595,7 +587,6 @@ class ADFSnewMap(ADFSmap):
         return free_space
     
     def read_catalogue(self, base):
-        debugpy.breakpoint()
         head = base
         p = 0
         
@@ -916,7 +907,6 @@ class ADFSdisc(Utilities):
         # Check the properties using the length of the file
         adf.seek(0,2)
         length = adf.tell()
-        print("Length of afd.tell == %s" % length)
         adf.seek(0,0)
         
         if length == 163840:
@@ -954,7 +944,6 @@ class ADFSdisc(Utilities):
             self.dir_markers = ('Hugo', 'Nick')
             
             format = self._identify_format(adf)
-            print("Format = %s" % format)
 
             if format == 'D':
             
@@ -1077,7 +1066,6 @@ class ADFSdisc(Utilities):
         
         adf.seek((record["root dir"] * record["sector size"]) + 1, 0)
         word = adf.read(4)
-        print("Word = %s" % word)
         
         if word == b'Hugo' or word == b'Nick':
         
@@ -1166,7 +1154,6 @@ class ADFSdisc(Utilities):
             return '?'
     
     def _read_disc_record(self, offset):
-        print(f'Call _read_disk_record. self={self} offset={offset}')
         """Reads the disc record for D and E format disc images and returns a
         dictionary describing the disc image.
         """
@@ -1184,14 +1171,11 @@ class ADFSdisc(Utilities):
         
         # Sectors per track
         nsectors = self.sectors[offset + 1]
-        print("nsectors: type=%s val=%s" % (type(nsectors), nsectors))
 
         # Heads per track
         heads = self.sectors[offset + 2]
-        print("heads: type=%s val=%s" % (type(heads), heads))
         
         density = self.sectors[offset+3]
-        print("density: type=%s val=%s" % (type(density), density))
 
         
         if density == 1:
@@ -1215,45 +1199,37 @@ class ADFSdisc(Utilities):
         
         # Length of ID fields in the disc map
         idlen = self._read_unsigned_byte(self.sectors[offset + 4])
-        print("idlen: type=%s val=%s" % (type(idlen), idlen))
         
         # Number of bytes per map bit.
         bytes_per_bit = 2 ** self._read_unsigned_byte(self.sectors[offset + 5])
-        print("bytes_per_bit: type=%s val=%s" % (type(bytes_per_bit), bytes_per_bit))
 
         # LowSector
         # StartUp
         # LinkBits
         # BitSize (size of ID field?)
         bit_size = self._read_unsigned_byte(self.sectors[offset + 6 : offset + 7])
-        print("bit_size: type=%s val=%s" % (type(bit_size), bit_size))
 
         #print "Bit size: %s" % hex(bit_size)
         # RASkew
         # BootOpt
         # Zones
         zones = self.sectors[offset + 9]
-        print("zones: type=%s val=%s" % (type(zones), zones))
 
         # ZoneSpare
         # RootDir
         root = self._str2num(3, self.sectors[offset + 13 : offset + 16]) # was 15
-        print("root: type=%s val=%s" % (type(root), root))
 
         # Identify
         # SequenceSides
         # DoubleStep
         # DiscSize
         disc_size = self._read_unsigned_word(self.sectors[offset + 16 : offset + 20])
-        print("disc_size: type=%s val=%s" % (type(disc_size), disc_size))
 
         # DiscId
         disc_id   = self._read_unsigned_half_word(self.sectors[offset + 20 : offset + 22])
-        print("disc_id: type=%s val=%s" % (type(disc_id), disc_id))
 
         # DiscName
         disc_name = self.sectors[offset + 22 : offset + 32].decode('ascii').strip()
-        print("disc_name: type=%s val=%s" % (type(disc_name), disc_name))
         
         record = {'sectors': nsectors, 'log2 sector size': log2_sector_size,
             'sector size': 2**log2_sector_size, 'heads': heads,
@@ -1270,7 +1246,6 @@ class ADFSdisc(Utilities):
         first_free = self._read_unsigned_half_word(self.sectors[1:3])
         
         if self.disc_type == 'adE':
-            print("Disc Type == 'adE'")
             self.record = self._read_disc_record(4)
             
             self.sector_size = self.record["sector size"]
@@ -1309,7 +1284,6 @@ class ADFSdisc(Utilities):
         if inter==0:
             try:
                 for i in range(0, self.ntracks):
-                    debugpy.breakpoint
                     t.extend(f.read(self.nsectors * self.sector_size))
             
             except IOError:
