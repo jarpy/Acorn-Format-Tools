@@ -1084,7 +1084,6 @@ class ADFSdisc(Utilities):
                     (INFORM, "%s: %s" % (key, ["no", "yes"][value]))
                     )
         
-        print("Checklist: %s" % checklist)
         # If all the tests pass then the disc is an E format disc.
         if reduce(lambda a, b: a + b, list(checklist.values()), 0) == \
             len(list(checklist.keys())):
