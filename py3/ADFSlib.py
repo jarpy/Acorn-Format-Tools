@@ -1160,13 +1160,7 @@ class ADFSdisc(Utilities):
         # See ADFS/DiscRecord.htm for details.
         
         # Total sectors per track (sectors * heads)
-        #log2_sector_size = (self.sectors[offset])
-        log2_sector_size = (self._read_signed_byte(self.sectors[offset]))
-        log2_sector_size = 10
-        #print("log2_sector_size: type=%s val=%s" % (type(log2_sector_size), log2_sector_size))
-        #if isinstance(log2_sector_size, str):
-        #    log2_sector_size = log2_sector_size.encode('ascii')
-        #    log2_sector_size = log2_sector_size[0]
+        log2_sector_size = (self.sectors[offset])
         
         # Sectors per track
         nsectors = self.sectors[offset + 1]
