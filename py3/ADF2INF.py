@@ -253,9 +253,9 @@ if __name__ == "__main__":
             # Create an ADFSdisc instance using this file.
             adfsdisc = ADFSlib.ADFSdisc(adf, verify = 1)
         
-        except ADFSlib.ADFS_exception:
-        
+        except ADFSlib.ADFS_exception as e:
             print("Unrecognised disc image: %s" % adf_file)
+            print(e)
             sys.exit(exit_codes['adfs_error'])
     
     else:

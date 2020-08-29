@@ -24,10 +24,15 @@ __date__ = "Sun 29th August 2010"
 __version__ = "0.42"
 __license__ = "GNU General Public License (version 3)"
 
+import debugpy
+debugpy.listen(5678)
+print("Waiting for debugger attach")
+#debugpy.wait_for_client()
 
 import os, string, struct, time
 from functools import reduce
 
+import sys
 
 INFORM = 0
 WARNING = 1
@@ -42,36 +47,60 @@ class Utilities:
     # Little endian reading
     
     def _read_signed_word(self, s):
-    
+        #print("_read_signed_word: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
         return struct.unpack("<i", s)[0]
     
     def _read_unsigned_word(self, s):
-    
+        #print("_read_unsigned_word: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
+        if isinstance(s, str):
+            s = s.encode('ascii')
         return struct.unpack("<I", s)[0]
     
     def _read_signed_byte(self, s):
-    
+        #print("_read_signed_byte: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
+        if isinstance(s, str):
+            s = s.encode('ascii')
         return struct.unpack("<b", s)[0]
     
     def _read_unsigned_byte(self, s):
-    
+        #print("_read_unsigned_byte: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
+        if isinstance(s, str):
+            s = s.encode('ascii')
         return struct.unpack("<B", s)[0]
     
     def _read_unsigned_half_word(self, s):
-    
+        #print("_read_unsigned_half_word: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
+        if isinstance(s, str):
+            s = s.encode('ascii')
+
         return struct.unpack("<H", s)[0]
     
     def _read_signed_half_word(self, s):
-    
+        #print("_read_signed_half_word: %s" % type(s))
+        if isinstance(s, int):
+            s = bytes([s])
         return struct.unpack("<h", s)[0]
     
     def _str2num(self, size, s):
-    
+        #print("_str2num: size=%s s=%s" % (size, type(s)))        
+        #return int(s.decode('ascii'))
+        if isinstance(s, str):
+            s = s.encode('ascii')
         i = 0
         n = 0
         while i < size:
         
-            n = n | (ord(s[i]) << (i*8))
+            n = n | s[i] << (i*8)
             i = i + 1
         
         return n
@@ -95,7 +124,9 @@ class Utilities:
         return new
     
     def _safe(self, s, with_space = 0):
-    
+        print(f"Called _safe with s type={type(s)} val={s}")
+        if isinstance(s, str):
+            s = s.encode('ascii')
         new = ""
         if with_space == 1:
             lower = 31
@@ -103,16 +134,16 @@ class Utilities:
             lower = 32
         
         for i in s:
-        
-            if ord(i) <= lower:
+            i = i
+            if i <= lower:
                 break
             
-            if ord(i) >= 128:
-                c = ord(i)^128
+            if i >= 128:
+                c = i^128
                 if c > 32:
                     new = new + chr(c)
             else:
-                new = new + i
+                new = new + chr(i)
         
         return new
     
@@ -308,6 +339,8 @@ class ADFSfile:
 
 
 class ADFSmap(Utilities):
+    def __contains__(self, index):
+        return index in self.disc_map
 
     def __getitem__(self, index):
     
@@ -320,7 +353,7 @@ class ADFSmap(Utilities):
 
 class ADFSnewMap(ADFSmap):
 
-    dir_markers = ('Hugo', 'Nick')
+    dir_markers = (b'Hugo', b'Nick')
     root_dir_address = 0x800
     
     def __init__(self, header, begin, end, sectors, sector_size, record):
@@ -348,8 +381,9 @@ class ADFSnewMap(ADFSmap):
         current_piece = None
         current_start = 0
         
+        print(f'self.sector_size={self.sector_size}')
         next_zone = self.header + self.sector_size
-        
+
         # Copy the free space map.
         free_space = self.free_space[:]
         
@@ -443,7 +477,7 @@ class ADFSnewMap(ADFSmap):
             
                 # In a piece being read.
                 
-                value = ord(self.sectors[a])
+                value = self.sectors[a]
                 
                 if value == 0:
                 
@@ -497,6 +531,7 @@ class ADFSnewMap(ADFSmap):
         
             # The next zone starts a sector after this one.
             next_zone = a + self.sector_size
+            print(f'a={a} self.sector_size={self.sector_size}')
             
             a = a + 1
             
@@ -531,7 +566,6 @@ class ADFSnewMap(ADFSmap):
                 b = a + 1
                 
                 while b < next_zone:
-                
                     c = b + 1
                     
                     value = self._read_unsigned_byte(self.sectors[b])
@@ -561,36 +595,28 @@ class ADFSnewMap(ADFSmap):
         return free_space
     
     def read_catalogue(self, base):
-    
+        debugpy.breakpoint()
         head = base
         p = 0
         
         dir_seq = self.sectors[head + p]
         dir_start = self.sectors[head+p+1:head+p+5]
         if dir_start not in self.dir_markers:
-        
-            if self.verify:
-            
-                self.verify_log.append(
-                    (WARNING, 'Not a directory: %s' % hex(head))
-                    )
-            
             return '', []
         
         p = p + 5
         
         files = []
         
-        while ord(self.sectors[head+p]) != 0:
+        while self.sectors[head+p] != 0:
         
             old_name = self.sectors[head+p:head+p+10]
             top_set = 0
             counter = 1
             for i in old_name:
-                if (ord(i) & 128) != 0:
+                if (i & 128) != 0:
                     top_set = counter
                 counter = counter + 1
-            
             name = self._safe(self.sectors[head+p:head+p+10])
             
             load = self._read_unsigned_word(self.sectors[head+p+10:head+p+14])
@@ -670,7 +696,7 @@ class ADFSnewMap(ADFSmap):
                     # Remember that inddiscadd will be a sequence of
                     # pairs of addresses.
                     
-                    file = ""
+                    file = bytearray()
                     remaining = length
                     
                     for start, end in inddiscadd:
@@ -781,7 +807,7 @@ class ADFSnewMap(ADFSmap):
 
 class ADFSbigNewMap(ADFSnewMap):
 
-    dir_markers = ('Nick',)
+    dir_markers = (b'Nick',)
     root_dir_address = 0xc8800
     
     def find_address_from_map(self, addr, begin, entry):
@@ -890,6 +916,7 @@ class ADFSdisc(Utilities):
         # Check the properties using the length of the file
         adf.seek(0,2)
         length = adf.tell()
+        print("Length of afd.tell == %s" % length)
         adf.seek(0,0)
         
         if length == 163840:
@@ -927,7 +954,8 @@ class ADFSdisc(Utilities):
             self.dir_markers = ('Hugo', 'Nick')
             
             format = self._identify_format(adf)
-            
+            print("Format = %s" % format)
+
             if format == 'D':
             
                 self.disc_type = 'adD'
@@ -1049,8 +1077,9 @@ class ADFSdisc(Utilities):
         
         adf.seek((record["root dir"] * record["sector size"]) + 1, 0)
         word = adf.read(4)
+        print("Word = %s" % word)
         
-        if word == "Hugo" or word == "Nick":
+        if word == b'Hugo' or word == b'Nick':
         
             # A valid directory identifier was found.
             checklist["Root directory at location given"] = 1
@@ -1067,6 +1096,7 @@ class ADFSdisc(Utilities):
                     (INFORM, "%s: %s" % (key, ["no", "yes"][value]))
                     )
         
+        print("Checklist: %s" % checklist)
         # If all the tests pass then the disc is an E format disc.
         if reduce(lambda a, b: a + b, list(checklist.values()), 0) == \
             len(list(checklist.keys())):
@@ -1136,21 +1166,33 @@ class ADFSdisc(Utilities):
             return '?'
     
     def _read_disc_record(self, offset):
-    
+        print(f'Call _read_disk_record. self={self} offset={offset}')
         """Reads the disc record for D and E format disc images and returns a
         dictionary describing the disc image.
         """
-        
+    
         # See ADFS/DiscRecord.htm for details.
         
         # Total sectors per track (sectors * heads)
-        log2_sector_size = ord(self.sectors[offset])
-        # Sectors per track
-        nsectors = ord(self.sectors[offset + 1])
-        # Heads per track
-        heads = ord(self.sectors[offset + 2])
+        #log2_sector_size = (self.sectors[offset])
+        log2_sector_size = (self._read_signed_byte(self.sectors[offset]))
+        log2_sector_size = 10
+        #print("log2_sector_size: type=%s val=%s" % (type(log2_sector_size), log2_sector_size))
+        #if isinstance(log2_sector_size, str):
+        #    log2_sector_size = log2_sector_size.encode('ascii')
+        #    log2_sector_size = log2_sector_size[0]
         
-        density = ord(self.sectors[offset+3])
+        # Sectors per track
+        nsectors = self.sectors[offset + 1]
+        print("nsectors: type=%s val=%s" % (type(nsectors), nsectors))
+
+        # Heads per track
+        heads = self.sectors[offset + 2]
+        print("heads: type=%s val=%s" % (type(heads), heads))
+        
+        density = self.sectors[offset+3]
+        print("density: type=%s val=%s" % (type(density), density))
+
         
         if density == 1:
         
@@ -1173,44 +1215,62 @@ class ADFSdisc(Utilities):
         
         # Length of ID fields in the disc map
         idlen = self._read_unsigned_byte(self.sectors[offset + 4])
+        print("idlen: type=%s val=%s" % (type(idlen), idlen))
+        
         # Number of bytes per map bit.
         bytes_per_bit = 2 ** self._read_unsigned_byte(self.sectors[offset + 5])
+        print("bytes_per_bit: type=%s val=%s" % (type(bytes_per_bit), bytes_per_bit))
+
         # LowSector
         # StartUp
         # LinkBits
         # BitSize (size of ID field?)
         bit_size = self._read_unsigned_byte(self.sectors[offset + 6 : offset + 7])
+        print("bit_size: type=%s val=%s" % (type(bit_size), bit_size))
+
         #print "Bit size: %s" % hex(bit_size)
         # RASkew
         # BootOpt
         # Zones
-        zones = ord(self.sectors[offset + 9])
+        zones = self.sectors[offset + 9]
+        print("zones: type=%s val=%s" % (type(zones), zones))
+
         # ZoneSpare
         # RootDir
         root = self._str2num(3, self.sectors[offset + 13 : offset + 16]) # was 15
+        print("root: type=%s val=%s" % (type(root), root))
+
         # Identify
         # SequenceSides
         # DoubleStep
         # DiscSize
         disc_size = self._read_unsigned_word(self.sectors[offset + 16 : offset + 20])
+        print("disc_size: type=%s val=%s" % (type(disc_size), disc_size))
+
         # DiscId
         disc_id   = self._read_unsigned_half_word(self.sectors[offset + 20 : offset + 22])
+        print("disc_id: type=%s val=%s" % (type(disc_id), disc_id))
+
         # DiscName
-        disc_name = string.strip(self.sectors[offset + 22 : offset + 32])
+        disc_name = self.sectors[offset + 22 : offset + 32].decode('ascii').strip()
+        print("disc_name: type=%s val=%s" % (type(disc_name), disc_name))
         
-        return {'sectors': nsectors, 'log2 sector size': log2_sector_size,
+        record = {'sectors': nsectors, 'log2 sector size': log2_sector_size,
             'sector size': 2**log2_sector_size, 'heads': heads,
             'density': density,
             'disc size': disc_size, 'disc ID': disc_id,
             'disc name': disc_name, 'zones': zones, 'root dir': root }
+        
+        #print(record)
+        return record
     
     def _read_disc_info(self):
     
-        checksum = ord(self.sectors[0])
+        checksum = self.sectors[0]
         first_free = self._read_unsigned_half_word(self.sectors[1:3])
         
         if self.disc_type == 'adE':
-        
+            print("Disc Type == 'adE'")
             self.record = self._read_disc_record(4)
             
             self.sector_size = self.record["sector size"]
@@ -1242,15 +1302,15 @@ class ADFSdisc(Utilities):
     
     def _read_tracks(self, f, inter):
     
-        t = ""
+        t = bytearray()
         
         f.seek(0, 0)
         
         if inter==0:
             try:
                 for i in range(0, self.ntracks):
-                
-                    t = t + f.read(self.nsectors * self.sector_size)
+                    debugpy.breakpoint
+                    t.extend(f.read(self.nsectors * self.sector_size))
             
             except IOError:
                 print('Less than %i tracks found.' % self.ntracks)
@@ -1303,13 +1363,13 @@ class ADFSdisc(Utilities):
         
         files = []
         
-        while ord(self.sectors[head+p]) != 0:
+        while self.sectors[head+p] != 0:
         
             old_name = self.sectors[head+p:head+p+10]
             top_set = 0
             counter = 1
             for i in old_name:
-                if (ord(i) & 128) != 0:
+                if (i & 128) != 0:
                     top_set = counter
                 counter = counter + 1
             
@@ -1476,13 +1536,12 @@ class ADFSdisc(Utilities):
                 if not filetypes:
                 
                     # Load and execution addresses treated as valid.
-                    print(string.expandtabs(
-                        "%s.%s\t%X\t%X\t%X" % (
-                            path, name, obj.load_address,
-                            obj.execution_address, obj.length
-                            ), 16
-                        ))
-                
+                    print(
+                        f'{path}.{name:16}' +
+                        f'{obj.load_address:>16}' +
+                        f'{obj.execution_address:>16}' +
+                        f'{obj.length:>16}'
+                    )
                 else:
                 
                     # Load address treated as a filetype; load and execution
@@ -1490,22 +1549,20 @@ class ADFSdisc(Utilities):
                     
                     time_stamp = obj.time_stamp()
                     if not time_stamp or not obj.has_filetype():
-                    
-                        print(string.expandtabs(
-                            "%s.%s\t%X\t%X\t%X" % (
-                                path, name, obj.load_address,
-                                obj.execution_address, obj.length
-                                ), 16
-                            ))
+                        print(
+                            f'{path}.{name:16}' +
+                            f'{obj.load_address:>16}' +
+                            f'{obj.execution_address:>16}' +
+                            f'{obj.length:>16}'
+                        )
                     else:
                         time_stamp = time.strftime("%H:%M:%S, %a %d %b %Y", time_stamp)
-                        print(string.expandtabs(
-                            "%s.%s\t%s\t%s\t%X" % (
-                                path, name, obj.filetype().upper(), time_stamp,
-                                obj.length
-                                ), 16
-                            ))
-            
+                        print(
+                            f'{path}.{name:16}' +
+                            f'{obj.filetype().upper():>8}' +
+                            f'{time_stamp:>32}' +
+                            f'{obj.length:>16}'
+                        )
             else:
             
                 self.print_catalogue(obj.files, path + "." + name, filetypes)
