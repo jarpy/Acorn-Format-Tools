@@ -915,7 +915,7 @@ class ADFSdisc(Utilities):
             self.sector_size = 256
             interleave = 0
             self.disc_type = 'ads'
-            self.dir_markers = ('Hugo',)
+            self.dir_markers = (b'Hugo',)
         
         elif length == 327680:
             self.ntracks = 80
@@ -923,7 +923,7 @@ class ADFSdisc(Utilities):
             self.sector_size = 256
             interleave = 0
             self.disc_type = 'adm'
-            self.dir_markers = ('Hugo',)
+            self.dir_markers = (b'Hugo',)
         
         elif length == 655360:
             self.ntracks = 160
@@ -933,7 +933,7 @@ class ADFSdisc(Utilities):
             # sequenced.
             interleave = 1
             self.disc_type = 'adl'
-            self.dir_markers = ('Hugo',)
+            self.dir_markers = (b'Hugo',)
         
         elif length == 819200:
         
@@ -941,7 +941,7 @@ class ADFSdisc(Utilities):
             self.nsectors = 10
             self.sector_size = 1024
             interleave = 0
-            self.dir_markers = ('Hugo', 'Nick')
+            self.dir_markers = (b'Hugo', b'Nick')
             
             format = self._identify_format(adf)
 
@@ -963,7 +963,7 @@ class ADFSdisc(Utilities):
             self.sector_size = 1024
             interleave = 0
             self.disc_type = 'adEbig'
-            self.dir_markers = ('Nick',)
+            self.dir_markers = (b'Nick',)
         
         else:
             raise ADFS_exception('Please supply a .adf, .adl or .adD file.')
@@ -1104,7 +1104,7 @@ class ADFSdisc(Utilities):
         word2 = adf.read(4)
         adf.seek(0)
         
-        if word1 == 'Hugo':
+        if word1 == b'Hugo':
         
             if self.verify:
             
@@ -1116,7 +1116,7 @@ class ADFSdisc(Utilities):
             
             return 'D'
         
-        elif word1 == 'Nick':
+        elif word1 == b'Nick':
         
             if self.verify:
             
@@ -1128,7 +1128,7 @@ class ADFSdisc(Utilities):
             
             return 'D'
         
-        elif word2 == 'Nick':
+        elif word2 == b'Nick':
         
             if self.verify:
             
