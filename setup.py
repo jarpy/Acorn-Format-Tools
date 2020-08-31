@@ -6,7 +6,7 @@ with open("README.md", "r") as readme:
 setuptools.setup(
     name="Acorn-Format-Tools",
     version="0.0.1",
-    author="Toby McLaughlin",
+    author="David Boddie, Toby McLaughlin",
     author_email="toby@jarpy.net",
     description="Python 3 fork of David Boddie's Acorn-Format-Tools.",
     long_description=long_description,
