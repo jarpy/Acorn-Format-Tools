@@ -320,7 +320,7 @@ if __name__ == "__main__":
     
         convert_dict = {}
         
-        pairs = string.split(match["convert"])
+        pairs = match["convert"].split(",")
         
         try:
         
