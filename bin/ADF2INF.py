@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os, string, sys
+
 from acorn_format_tools import ADFSlib
+from textwrap import dedent
 
 try:
 
@@ -149,53 +151,53 @@ if __name__ == "__main__":
                  "<ADF file> <destination path>"
         match = read_getopt_input(sys.argv)
     
-    if match == {} or match is None or \
-        "h" in match or "help" in match:
-    
-        print("Syntax: ADF2INF.py " + syntax)
-        print()
-        print('ADF2INF version ' + __version__)
-        print('ADFSlib version ' + ADFSlib.__version__)
-        print()
-        print('Take the files stored in the directory given and store them as files with')
-        print('corresponding INF files.')
-        print()
-        print('If the -l flag is specified then the catalogue of the disc will be printed.')
-        print()
-        print("The -u flag specifies the display units for file sizes when printing the")
-        print('catalogue. The default is bytes "-uB". Kilobytes are shown with "-uK".')
-        print()
-        print("The -d flag specifies that a directory should be created using the disc's")
-        print('name into which the contents of the disc will be written.')
-        print()
-        print("The -t flag causes the load and execution addresses of files to be")
-        print("interpreted as file type information for files created on RISC OS.")
-        print("A separator used to append a suffix onto the file is optional and")
-        print("defaults to the standard period character; e.g. myfile.fff")
-        print()
-        print("The -s flag is used to specify the character which joins the file")
-        print("name to the file type. This can only be specified when extracting")
-        print("files from a disc image.")
-        print()
-        print("The -v flag causes the disc image to be checked for simple defects and")
-        print("determines whether there are files and directories which cannot be")
-        print("correctly located by this tool, whether due to a corrupted disc image")
-        print("or a bug in the image decoding techniques used.")
-        print()
-        print("The -c flag allows the user to define a conversion dictionary for the")
-        print("characters found in ADFS filenames. The format of the string used to")
-        print("define this dictionary is a comma separated list of character pairs:")
-        print()
-        print("    <src1><dest1>[,<src2><dest2>]...")
-        print()
-        print("If no conversion dictionary is specified then a default dictionary will")
-        print("be used. This is currently defined as")
-        print()
-        print("    %s" % repr(default_convert_dict))
-        print()
-        print("The -m flag determines whether the files extracted from the disc")
-        print("image should retain their time stamps on the target system.")
-        print()
+    if not match or "h" in match or "help" in match:
+        print(dedent(
+            f"""
+            Syntax: ADF2INF.py {syntax}
+
+            ADF2INF version {__version__}
+            ADFSlib version {ADFSlib.__version__}
+
+            Take the files stored in the directory given and store them as files with
+            corresponding INF files.
+
+            If the -l flag is specified then the catalogue of the disc will be printed.
+
+            The -u flag specifies the display units for file sizes when printing the
+            catalogue. The default is bytes "-uB". Kilobytes are shown with "-uK".
+
+            The -d flag specifies that a directory should be created using the disc's
+            name into which the contents of the disc will be written.
+
+            The -t flag causes the load and execution addresses of files to be
+            interpreted as file type information for files created on RISC OS.
+            A separator used to append a suffix onto the file is optional and
+            defaults to the standard period character; e.g. myfile.fff
+
+            The -s flag is used to specify the character which joins the file
+            name to the file type. This can only be specified when extracting
+            files from a disc image.
+
+            The -v flag causes the disc image to be checked for simple defects and
+            determines whether there are files and directories which cannot be
+            correctly located by this tool, whether due to a corrupted disc image
+            or a bug in the image decoding techniques used.
+
+            The -c flag allows the user to define a conversion dictionary for the
+            characters found in ADFS filenames. The format of the string used to
+            define this dictionary is a comma separated list of character pairs:
+
+                <src1><dest1>[,<src2><dest2>]...
+
+            If no conversion dictionary is specified then a default dictionary will
+            be used. This is currently defined as
+
+                {default_convert_dict}
+
+            The -m flag determines whether the files extracted from the disc
+            image should retain their time stamps on the target system.
+            """))
         sys.exit()
     
     
