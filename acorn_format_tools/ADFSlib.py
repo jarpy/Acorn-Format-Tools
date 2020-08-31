@@ -1467,7 +1467,7 @@ class ADFSdisc(Utilities):
         
         return dir_name, files
     
-    def print_catalogue(self, files = None, path = "$", filetypes = 0):
+    def print_catalogue(self, files = None, path = "$", filetypes = 0, size_unit="B"):
     
         """Prints the contents of the disc catalogue to standard output.
         Usually, this method is called without specifying any of the keyword
@@ -1485,8 +1485,12 @@ class ADFSdisc(Utilities):
         If filetypes is set to True or a non-False value, the file types of
         each file will be displayed; otherwise, load and execution addresses
         will be displayed instead.
+
+        If size_unit is set to "B" (the default), filesizes will be printed
+        in bytes. If set to "K" or "KiB", they will be printed in kibibytes.
         """
-        
+        assert size_unit in ["B", "K", "KiB"]
+
         if files is None:
         
             files = self.files
@@ -1498,6 +1502,12 @@ class ADFSdisc(Utilities):
         for obj in files:
     
             name = obj.name
+
+            if size_unit == "B":
+                display_size = f'{obj.length:>16} Bytes'
+            elif size_unit in ["K", "KiB"]:
+                display_size = f'{(obj.length / 1024):>16.1f} KiB'
+
             if isinstance(obj, ADFSfile):
             
                 if not filetypes:
@@ -1507,7 +1517,7 @@ class ADFSdisc(Utilities):
                         f'{path}.{name:16}' +
                         f'{obj.load_address:>16}' +
                         f'{obj.execution_address:>16}' +
-                        f'{obj.length:>16}'
+                        f'{display_size}'
                     )
                 else:
                 
@@ -1520,7 +1530,7 @@ class ADFSdisc(Utilities):
                             f'{path}.{name:16}' +
                             f'{obj.load_address:>16}' +
                             f'{obj.execution_address:>16}' +
-                            f'{obj.length:>16}'
+                            f'{display_size}'
                         )
                     else:
                         time_stamp = time.strftime("%H:%M:%S, %a %d %b %Y", time_stamp)
@@ -1528,7 +1538,7 @@ class ADFSdisc(Utilities):
                             f'{path}.{name:16}' +
                             f'{obj.filetype().upper():>8}' +
                             f'{time_stamp:>32}' +
-                            f'{obj.length:>16}'
+                            f'{display_size}'
                         )
             else:
             

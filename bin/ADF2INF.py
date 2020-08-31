@@ -67,12 +67,12 @@ def read_cmdsyntax_input(argv, syntax):
 
 def read_getopt_input(argv):
 
-    opts, args = getopt.getopt(argv[1:], "ldts:c:vh")
+    opts, args = getopt.getopt(argv[1:], "ldtsu:c:vh")
     
     match = {}
     
     opt_dict = {"-l": "list", "-d": "create-directory", "-t": "file-types", "-s": "separator",
-                "-v": "verify", "-c": "convert", "-h": "help"}
+                "-u": "size-unit", "-v": "verify", "-c": "convert", "-h": "help"}
     arg_list = ["ADF file", "destination path"]
     
     # Read the options specified.
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     
     else:
     
-        syntax = "[-l] [-d] [-t] [-s separator] [-v] [-c characters] [-m] " + \
+        syntax = "[-l] [-d] [-t] [-s separator] [-v] [-c characters] [-m] [-u size unit]" + \
                  "<ADF file> <destination path>"
         match = read_getopt_input(sys.argv)
     
@@ -161,6 +161,9 @@ if __name__ == "__main__":
         print('corresponding INF files.')
         print()
         print('If the -l flag is specified then the catalogue of the disc will be printed.')
+        print()
+        print("The -u flag specifies the display units for file sizes when printing the")
+        print('catalogue. The default is bytes "-uB". Kilobytes are shown with "-uK".')
         print()
         print("The -d flag specifies that a directory should be created using the disc's")
         print('name into which the contents of the disc will be written.')
@@ -212,6 +215,10 @@ if __name__ == "__main__":
     
     separator = match.get("separator", ",")
     
+    size_unit = match.get("size-unit", "B")
+    if size_unit is None:
+        size_unit = "B"
+
     if sys.platform == 'RISCOS':
         suffix = '/'
     else:
@@ -287,7 +294,7 @@ if __name__ == "__main__":
         print('Contents of', adfsdisc.disc_name,':')
         print()
         
-        adfsdisc.print_catalogue(adfsdisc.files, adfsdisc.root_name, filetypes)
+        adfsdisc.print_catalogue(adfsdisc.files, adfsdisc.root_name, filetypes, size_unit)
         
         print()
         
