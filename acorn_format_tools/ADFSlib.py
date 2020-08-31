@@ -101,7 +101,7 @@ class Utilities:
     
     def _binary(self, size, n):
     
-        new = ""
+        new = bytearray()
         while (n != 0) & (size > 0):
         
             if (n & 1)==1:
@@ -121,23 +121,22 @@ class Utilities:
         if isinstance(s, str):
             s = s.encode('ascii')
 
-        new = ""
+        new = bytearray()
         if with_space == 1:
             lower = 31
         else:
             lower = 32
         
         for i in s:
-            i = i
             if i <= lower:
                 break
             
             if i >= 128:
                 c = i^128
                 if c > 32:
-                    new = new + chr(c)
+                    new.extend(bytes([c]))
             else:
-                new = new + chr(i)
+                new.extend(bytes([i]))
         
         return new
     
@@ -239,11 +238,11 @@ class Utilities:
         
             if c in list(convert_dict.keys()):
             
-                name = name + convert_dict[c]
+                name = name + convert_dict[chr(c)]
             
             else:
             
-                name = name + c
+                name = name + chr(c)
         
         if self.verify and old_name != name:
         
