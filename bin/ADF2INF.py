@@ -147,7 +147,7 @@ if __name__ == "__main__":
     
     else:
     
-        syntax = "[-l] [-d] [-t] [-s separator] [-v] [-c characters] [-m] [-u size unit]" + \
+        syntax = "[-l] [-u size unit] [-d] [-t] [-s separator] [-v] [-c characters] [-m]" + \
                  "<ADF file> <destination path>"
         match = read_getopt_input(sys.argv)
     
