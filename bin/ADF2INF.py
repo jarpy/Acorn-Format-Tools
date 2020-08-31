@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os, string, sys
-import ADFSlib
+from acorn_format_tools import ADFSlib
 
 try:
 
