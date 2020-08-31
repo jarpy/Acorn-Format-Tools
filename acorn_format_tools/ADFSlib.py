@@ -56,30 +56,21 @@ class Utilities:
     def _read_unsigned_word(self, s):
         if isinstance(s, int):
             s = bytes([s])
-        if isinstance(s, str):
-            s = s.encode('ascii')
         return struct.unpack("<I", s)[0]
     
     def _read_signed_byte(self, s):
         if isinstance(s, int):
             s = bytes([s])
-        if isinstance(s, str):
-            s = s.encode('ascii')
         return struct.unpack("<b", s)[0]
     
     def _read_unsigned_byte(self, s):
         if isinstance(s, int):
             s = bytes([s])
-        if isinstance(s, str):
-            s = s.encode('ascii')
         return struct.unpack("<B", s)[0]
     
     def _read_unsigned_half_word(self, s):
         if isinstance(s, int):
             s = bytes([s])
-        if isinstance(s, str):
-            s = s.encode('ascii')
-
         return struct.unpack("<H", s)[0]
     
     def _read_signed_half_word(self, s):
@@ -88,8 +79,6 @@ class Utilities:
         return struct.unpack("<h", s)[0]
     
     def _str2num(self, size, s):
-        if isinstance(s, str):
-            s = s.encode('ascii')
         i = 0
         n = 0
         while i < size:
