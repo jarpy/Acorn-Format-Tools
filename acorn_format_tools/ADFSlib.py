@@ -138,7 +138,7 @@ class Utilities:
             else:
                 new.extend(bytes([i]))
         
-        return new
+        return new.decode('ascii')
     
     def _plural(self, msg, values, words):
     
@@ -238,11 +238,11 @@ class Utilities:
         
             if c in list(convert_dict.keys()):
             
-                name = name + convert_dict[chr(c)]
+                name = name + convert_dict[c]
             
             else:
             
-                name = name + chr(c)
+                name = name + c
         
         if self.verify and old_name != name:
         
@@ -269,7 +269,7 @@ class ADFSdirectory:
     
     def __init__(self, name, files):
     
-        self.name = name
+        self.name = name.decode('ascii')
         self.files = files
     
     def __repr__(self):
