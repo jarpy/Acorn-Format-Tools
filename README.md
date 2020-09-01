@@ -11,12 +11,25 @@ Python 3.
 Additional goals include:
 
  - Minor enhancements for `ADF2INF`.
- - `pip` packaging, with support for running `ADF2INF` easily on Windows.
+ - `pip` packaging, with support for running `py3adf.py` easily on Windows.
  - Tasteful use of new language features.
  - Increased type safety with type hints and explicit casts (where essential).
  - Automated acceptance tests.
 
 [Acorn-Format-Tools]: https://github.com/dboddie/Acorn-Format-Tools
+
+Installing
+----------
+```
+pip install py3adf
+```
+
+Running
+-------
+The pip package installs `py3adf.py` as a runnable script, so just:
+```
+py3adf.py
+```
 
 Authors
 -------
