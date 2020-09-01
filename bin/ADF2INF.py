@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, string, sys
 
-from acorn_format_tools import ADFSlib
+from py3adf import ADFSlib
 from textwrap import dedent
 
 try:

@@ -4,11 +4,11 @@ with open("README.md", "r") as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name="Acorn-Format-Tools",
-    version="0.0.1",
+    name="py3adf",
+    version="0.1.0",
     author="David Boddie, Toby McLaughlin",
     author_email="toby@jarpy.net",
-    description="Python 3 fork of David Boddie's Acorn-Format-Tools.",
+    description="Python 3 port of ADF2INF from David Boddie's Acorn-Format-Tools.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jarpy/Acorn-Format-Tools",
