@@ -24,7 +24,7 @@ __date__ = "Sun 29th August 2010"
 __version__ = "0.42"
 __license__ = "GNU General Public License (version 3)"
 
-import os, string, struct, time
+import os, struct, time
 from functools import reduce
 
 try:
@@ -209,8 +209,7 @@ class Utilities:
         
         except OSError:
         
-            print('Directory could not be created: %s' % \
-                string.join(elements, os.sep))
+            print(f'Directory could not be created: {os.path.join(*elements)}')
             
             return ""
         
