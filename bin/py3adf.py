@@ -51,7 +51,7 @@ def read_cmdsyntax_input(argv, syntax):
     
     if len(matches) != 1 and cmdsyntax.use_GUI() != None:
     
-        form = cmdsyntax.Form("ADF2INF", syntax_obj, failed[0])
+        form = cmdsyntax.Form("py3adf", syntax_obj, failed[0])
         
         matches = form.get_args()
     
@@ -154,9 +154,9 @@ if __name__ == "__main__":
     if not match or "h" in match or "help" in match:
         print(dedent(
             f"""
-            Syntax: ADF2INF.py {syntax}
+            Syntax: py3adf.py {syntax}
 
-            ADF2INF version {__version__}
+            py3adf version {__version__}
             ADFSlib version {ADFSlib.__version__}
 
             Take the files stored in the directory given and store them as files with
