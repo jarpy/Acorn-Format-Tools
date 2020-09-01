@@ -69,7 +69,7 @@ def read_cmdsyntax_input(argv, syntax):
 
 def read_getopt_input(argv):
 
-    opts, args = getopt.getopt(argv[1:], "ldtsu:c:vh")
+    opts, args = getopt.getopt(argv[1:], "ldts:u:c:vh")
     
     match = {}
     
