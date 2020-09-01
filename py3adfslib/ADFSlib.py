@@ -581,6 +581,13 @@ class ADFSnewMap(ADFSmap):
         dir_seq = self.sectors[head + p]
         dir_start = self.sectors[head+p+1:head+p+5]
         if dir_start not in self.dir_markers:
+
+            if self.verify:
+            
+                self.verify_log.append(
+                    (WARNING, 'Not a directory: %s' % hex(head))
+                    )
+
             return '', []
         
         p = p + 5
