@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jarpy/Acorn-Format-Tools",
     packages=setuptools.find_packages(),
-    scripts=['bin/ADF2INF.py'],
+    scripts=['bin/py3adf.py'],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os, string, sys
 
-from py3adf import ADFSlib
+from py3adfslib import ADFSlib
 from textwrap import dedent
 
 try:
