@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="py3adf",
-    version="0.1.0",
+    version="0.1.1",
     author="David Boddie, Toby McLaughlin",
     author_email="toby@jarpy.net",
     description="Python 3 port of ADF2INF from David Boddie's Acorn-Format-Tools.",
