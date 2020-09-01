@@ -27,15 +27,6 @@ __license__ = "GNU General Public License (version 3)"
 import os, struct, time
 from functools import reduce
 
-try:
-    if os.environ['DEBUGPY'] == 'true':
-        import debugpy
-        debugpy.listen(5678)
-        print("Waiting for debugger attach")
-        debugpy.wait_for_client()
-except KeyError:
-    pass
-
 INFORM = 0
 WARNING = 1
 ERROR = 2
