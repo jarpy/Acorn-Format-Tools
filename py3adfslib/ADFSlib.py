@@ -1522,9 +1522,9 @@ class ADFSdisc(Utilities):
                         time_stamp = time.strftime("%Y %B %d, %H:%M:%S", time_stamp)
                         print(
                             f'{path}.{name:16}' +
-                            f'{obj.filetype().upper():>8}' +
                             f'{time_stamp:>32}' +
-                            f'{display_size}'
+                            f'{display_size}' +
+                            f'{obj.filetype().upper():>8}'
                         )
             else:
             
