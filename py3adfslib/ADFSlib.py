@@ -1471,8 +1471,9 @@ class ADFSdisc(Utilities):
         each file will be displayed; otherwise, load and execution addresses
         will be displayed instead.
 
-        If size_unit is set to "B" (the default), filesizes will be printed
-        in bytes. If set to "K" or "KiB", they will be printed in kibibytes.
+        If size_unit is set to "B" (the default), filesizes will be printed in
+        bytes. If set to "K" or "KiB", they will be printed in kibibytes.  In
+        this instance, 'KB' is displayed, even though "KiB" is more accurate :)
         """
         assert size_unit in ["B", "K", "KiB"]
 
@@ -1491,7 +1492,7 @@ class ADFSdisc(Utilities):
             if size_unit == "B":
                 display_size = f'{obj.length:>16} Bytes'
             elif size_unit in ["K", "KiB"]:
-                display_size = f'{(obj.length / 1024):>16.1f} KiB'
+                display_size = f'{(obj.length / 1024):>16.1f} KB'
 
             if isinstance(obj, ADFSfile):
             
