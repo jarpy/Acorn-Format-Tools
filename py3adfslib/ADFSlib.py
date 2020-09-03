@@ -1481,13 +1481,20 @@ class ADFSdisc(Utilities):
         """
         assert size_unit in ["B", "K", "KiB"]
 
+        if path.startswith("$."):
+            display_path = path[2:]
+        elif path.startswith("$"):
+            display_path = path[1:]
+        else:
+            display_path = path
+
         if files is None:
         
             files = self.files
         
         if files == []:
         
-            print(path, "(empty)")
+            print(display_path, "(empty)")
         
         for obj in files:
     
@@ -1498,13 +1505,18 @@ class ADFSdisc(Utilities):
             elif size_unit in ["K", "KiB"]:
                 display_size = f'{(obj.length / 1024):>16.1f} KB'
 
+            if display_path:
+                full_display_name = display_path + "." + name
+            else:
+                full_display_name = name
+
             if isinstance(obj, ADFSfile):
             
                 if not filetypes:
                 
                     # Load and execution addresses treated as valid.
                     print(
-                        f'{path}.{name:16}' +
+                        f'{full_display_name:16}' +
                         f'{obj.load_address:>16}' +
                         f'{obj.execution_address:>16}' +
                         f'{display_size}'
@@ -1517,7 +1529,7 @@ class ADFSdisc(Utilities):
                     time_stamp = obj.time_stamp()
                     if not time_stamp or not obj.has_filetype():
                         print(
-                            f'{path}.{name:16}' +
+                            f'{full_display_name:16}' +
                             f'{obj.load_address:>16}' +
                             f'{obj.execution_address:>16}' +
                             f'{display_size}'
@@ -1525,7 +1537,7 @@ class ADFSdisc(Utilities):
                     else:
                         time_stamp = time.strftime("%Y %B %d, %H:%M:%S", time_stamp)
                         print(
-                            f'{path}.{name:16}' +
+                            f'{full_display_name:16}' +
                             f'{time_stamp:>32}' +
                             f'{display_size}' +
                             f'{obj.filetype().upper():>8}'
