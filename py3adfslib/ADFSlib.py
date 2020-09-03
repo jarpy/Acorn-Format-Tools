@@ -1532,7 +1532,7 @@ class ADFSdisc(Utilities):
                         )
             else:
             
-                self.print_catalogue(obj.files, path + "." + name, filetypes)
+                self.print_catalogue(obj.files, path + "." + name, filetypes, size_unit)
     
     def _extract_old_files(self, objects, path, filetypes = 0, separator = ",",
                            convert_dict = {}, with_time_stamps = False):
