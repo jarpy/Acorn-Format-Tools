@@ -247,9 +247,13 @@ class ADFSdirectory:
     """
     
     def __init__(self, name, files):
-    
-        self.name = name.decode('ascii')
+        if isinstance(name, str):
+            self.name = name
+        else:
+            self.name = name.decode('ascii')
+
         self.files = files
+        self.length = 0
     
     def __repr__(self):
     
